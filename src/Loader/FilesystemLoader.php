@@ -37,7 +37,7 @@ class FilesystemLoader implements LoaderInterface
     public function __construct($paths = [], string $rootPath = null)
     {
         $this->rootPath = (null === $rootPath ? getcwd() : $rootPath).\DIRECTORY_SEPARATOR;
-        if (false !== $realPath = realpath($rootPath)) {
+        if ($rootPath !== null && false !== ($realPath = realpath($rootPath))) {
             $this->rootPath = $realPath.\DIRECTORY_SEPARATOR;
         }
 
@@ -252,6 +252,10 @@ class FilesystemLoader implements LoaderInterface
     {
         if (false !== strpos($name, "\0")) {
             throw new LoaderError('A template name cannot contain NUL bytes.');
+        }
+
+        if ($this->isAbsolutePath($name)) {
+            throw new LoaderError(sprintf('A template name cannot be an absolute path (%s).', $name));
         }
 
         $name = ltrim($name, '/');
